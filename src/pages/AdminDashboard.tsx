@@ -290,10 +290,20 @@ const AdminDashboard = () => {
 
   const handleApprove = (id: number) => {
     console.log('Approving application:', id);
+    // Update application status to approved
+    const updatedApplications = recentApplications.map(app => 
+      app.id === id ? { ...app, status: 'Approved' } : app
+    );
+    console.log('Application approved successfully');
   };
 
   const handleReject = (id: number) => {
     console.log('Rejecting application:', id);
+    // Update application status to rejected
+    const updatedApplications = recentApplications.map(app => 
+      app.id === id ? { ...app, status: 'Rejected' } : app
+    );
+    console.log('Application rejected successfully');
   };
 
   const handleViewAll = () => {
@@ -509,18 +519,40 @@ const AdminDashboard = () => {
                         showReviewButton={true}
                         onReview={handleReview}
                       />
-                      {application.status === 'Pending Review' && (
-                        <div className="flex space-x-2 mt-4">
-                          <Button size="sm" onClick={() => handleApprove(application.id)}>
-                            <CheckCircle className="mr-1 h-4 w-4" />
-                            Approve
-                          </Button>
-                          <Button size="sm" variant="destructive" onClick={() => handleReject(application.id)}>
-                            <XCircle className="mr-1 h-4 w-4" />
-                            Reject
-                          </Button>
-                        </div>
-                      )}
+                      <div className="flex space-x-2 mt-4">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleReview(application.id)}
+                        >
+                          <Eye className="mr-1 h-4 w-4" />
+                          Review
+                        </Button>
+                        {application.status === 'Pending Review' && (
+                          <>
+                            <Button size="sm" onClick={() => handleApprove(application.id)}>
+                              <CheckCircle className="mr-1 h-4 w-4" />
+                              Approve
+                            </Button>
+                            <Button size="sm" variant="destructive" onClick={() => handleReject(application.id)}>
+                              <XCircle className="mr-1 h-4 w-4" />
+                              Reject
+                            </Button>
+                          </>
+                        )}
+                        {application.status === 'Under Review' && (
+                          <>
+                            <Button size="sm" onClick={() => handleApprove(application.id)}>
+                              <CheckCircle className="mr-1 h-4 w-4" />
+                              Approve
+                            </Button>
+                            <Button size="sm" variant="destructive" onClick={() => handleReject(application.id)}>
+                              <XCircle className="mr-1 h-4 w-4" />
+                              Reject
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -545,15 +577,20 @@ const AdminDashboard = () => {
               <CardContent>
                 <div className="space-y-4">
                   {students.map((student) => (
-                    <div key={student.id} className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between">
+                    <div key={student.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start justify-between mb-3">
                         <div>
-                          <h4 className="font-semibold">{student.name}</h4>
+                          <h4 className="font-semibold text-lg">{student.name}</h4>
                           <p className="text-sm text-muted-foreground">ID: {student.studentId}</p>
                           <p className="text-sm text-muted-foreground">{student.email}</p>
                           <p className="text-sm text-muted-foreground">{student.course} - Year {student.year}</p>
+                          <div className="mt-2">
+                            <Badge variant={student.status === 'Active' ? 'default' : 'secondary'}>
+                              {student.status}
+                            </Badge>
+                          </div>
                         </div>
-                        <div className="space-x-2">
+                        <div className="flex flex-wrap gap-2">
                           <Button size="sm" variant="outline" onClick={() => handleViewProfile(student.id)}>
                             <Eye className="mr-1 h-4 w-4" />
                             View Profile
@@ -571,6 +608,14 @@ const AdminDashboard = () => {
                           <Button size="sm" variant="outline" onClick={() => handleEvaluateStudent(student.name)}>
                             Evaluate
                           </Button>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
+                        <div>
+                          <span className="font-medium">Organization:</span> {student.organization || 'Not assigned'}
+                        </div>
+                        <div>
+                          <span className="font-medium">Supervisor:</span> {student.supervisor || 'Not assigned'}
                         </div>
                       </div>
                     </div>

@@ -18,7 +18,9 @@ import {
   Download,
   UserPlus,
   Edit,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  MapPin,
+  Star
 } from 'lucide-react';
 import Layout from '@/components/Layout';
 import DashboardHeader from '@/components/DashboardHeader';
@@ -399,7 +401,32 @@ const AdminDashboard = () => {
   };
 
   const handleExportReport = () => {
-    console.log('Exporting report...');
+    console.log('Generating comprehensive system report...');
+    
+    // Simulate report generation
+    const reportData = {
+      timestamp: new Date().toISOString(),
+      totalStudents: stats[0].value,
+      activeAttachments: stats[1].value,
+      partnerOrganizations: stats[2].value,
+      completionRate: stats[3].value,
+      applications: recentApplications,
+      students: students,
+      organizations: organizations,
+      evaluations: evaluations,
+      reports: reports
+    };
+
+    // Create downloadable report
+    const dataStr = JSON.stringify(reportData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `strathmore-attachment-system-report-${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
   };
 
   const handleReviewApplication = (data: any) => {
@@ -568,15 +595,58 @@ const AdminDashboard = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {organizations.map((org) => (
-                    <div key={org.id} className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-semibold">{org.name}</h4>
-                          <p className="text-sm text-muted-foreground">{org.industry}</p>
-                          <p className="text-sm text-muted-foreground">{org.activeStudents}/{org.totalCapacity} students assigned</p>
+                    <div key={org.id} className="p-6 border rounded-lg hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <Building2 className="h-6 w-6 text-blue-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-lg">{org.name}</h3>
+                            <Badge variant="secondary">{org.industry}</Badge>
+                          </div>
                         </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-1">
+                            <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                            <span className="text-sm font-medium">{org.rating}</span>
+                          </div>
+                          <Badge variant={org.status === 'Active' ? 'default' : 'destructive'}>
+                            {org.status}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                          <p className="text-sm font-medium">Contact Person</p>
+                          <p className="text-sm text-muted-foreground">{org.contactPerson}</p>
+                          <p className="text-xs text-muted-foreground">{org.email}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Location</p>
+                          <div className="flex items-center space-x-1">
+                            <MapPin className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">{org.location}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Capacity</p>
+                          <div className="flex items-center space-x-1">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">
+                              {org.activeStudents}/{org.totalCapacity} students
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-muted-foreground">
+                          Phone: {org.phone}
+                        </p>
                         <div className="space-x-2">
                           <Button size="sm" variant="outline" onClick={() => handleViewOrganizationDetails(org.id)}>
                             <Eye className="mr-1 h-4 w-4" />
@@ -587,6 +657,7 @@ const AdminDashboard = () => {
                             Edit
                           </Button>
                           <Button size="sm" onClick={() => handleManageStudents(org.id)}>
+                            <Users className="mr-1 h-4 w-4" />
                             Manage Students
                           </Button>
                         </div>
